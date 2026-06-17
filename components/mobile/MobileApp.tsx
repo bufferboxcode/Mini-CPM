@@ -139,7 +139,7 @@ function WorkspaceListScreen({ S, update }: SharedProps) {
             </svg>
           </div>
           <div>
-            <div style={{ color: 'white', fontSize: '18px', fontWeight: '700' }}>PEA Build</div>
+            <div style={{ color: 'white', fontSize: '18px', fontWeight: '700' }}>MiniCPM</div>
             <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>การไฟฟ้าส่วนภูมิภาค</div>
           </div>
         </div>

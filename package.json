@@ -1,5 +1,5 @@
 {
-  "name": "pea-build",
+  "name": "minicpm",
   "version": "0.1.0",
   "private": true,
   "scripts": {

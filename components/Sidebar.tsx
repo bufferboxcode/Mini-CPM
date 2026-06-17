@@ -50,7 +50,7 @@ export default function Sidebar({ S, update, ws }: SharedProps) {
             </svg>
           </div>
           <div>
-            <div style={{ color: 'white', fontSize: '16px', fontWeight: '700', lineHeight: '1.2' }}>PEA Build</div>
+            <div style={{ color: 'white', fontSize: '16px', fontWeight: '700', lineHeight: '1.2' }}>MiniCPM</div>
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', letterSpacing: '0.5px' }}>การไฟฟ้าส่วนภูมิภาค</div>
           </div>
         </div>

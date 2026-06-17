@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PEA Build",
+  title: "MiniCPM",
   description: "ระบบบริหารจัดการโครงการก่อสร้างระบบไฟฟ้า",
 };
 
