@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   description: "ระบบบริหารจัดการโครงการก่อสร้างระบบไฟฟ้า",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" style={{ height: "100%", overflow: "hidden" }}>

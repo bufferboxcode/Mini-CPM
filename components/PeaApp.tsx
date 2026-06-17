@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { C, catCfg, statusCfg } from '@/lib/constants';
 import { getCatSum, getPjSum, fmt } from '@/lib/utils';
 import { INITIAL_WORKSPACES, INITIAL_FORM } from '@/lib/data';
@@ -9,12 +9,14 @@ import DashboardView from './views/DashboardView';
 import ProjectsView from './views/ProjectsView';
 import ProjectDetailView from './views/ProjectDetailView';
 import Modals from './modals/Modals';
+import MobileApp from './mobile/MobileApp';
 
 export type { C };
 export { getCatSum, getPjSum, fmt, catCfg, statusCfg };
 
 const INITIAL_STATE: AppState = {
   view: 'dashboard',
+  mobileScreen: 'workspace-list',
   selectedWorkspaceId: 1,
   selectedProjectId: null,
   showModal: null,
@@ -45,7 +47,15 @@ export interface SharedProps {
 
 export default function PeaApp() {
   const [S, setS] = useState<AppState>(INITIAL_STATE);
+  const [isMobile, setIsMobile] = useState(false);
   const update = (patch: Partial<AppState>) => setS(prev => ({ ...prev, ...patch }));
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
   const pj = ws?.projects.find(p => p.id === S.selectedProjectId);
@@ -64,6 +74,8 @@ export default function PeaApp() {
   });
 
   const shared: SharedProps = { S, update, ws, pj, closeModal, modPj };
+
+  if (isMobile) return <MobileApp {...shared} />;
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: "'SaoChingcha', sans-serif", overflow: 'hidden', background: C.paper }}>

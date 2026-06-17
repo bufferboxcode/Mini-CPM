@@ -59,6 +59,7 @@ export interface FormState {
 
 export interface AppState {
   view: 'dashboard' | 'projects' | 'project-detail';
+  mobileScreen: 'workspace-list' | 'dashboard' | 'projects' | 'project-detail';
   selectedWorkspaceId: number;
   selectedProjectId: number | null;
   showModal: string | null;
