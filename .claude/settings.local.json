@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/test/.nvm/versions/**)"
+    ]
+  }
+}
