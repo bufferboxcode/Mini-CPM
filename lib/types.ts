@@ -26,6 +26,7 @@ export interface Division {
 
 export interface Project {
   id: number;
+  _convexId?: string;   // Convex document _id — ใส่หลัง save ครั้งแรก
   name: string;
   approvalNo: string;
   controlPerson: string;
@@ -41,6 +42,7 @@ export interface Project {
 
 export interface Workspace {
   id: number;
+  _convexId?: string;   // Convex document _id — ใส่หลัง save ครั้งแรก
   name: string;
   year: number;
   dept: string;
@@ -60,7 +62,7 @@ export interface FormState {
 export interface AppState {
   view: 'dashboard' | 'projects' | 'project-detail';
   mobileScreen: 'workspace-list' | 'dashboard' | 'projects' | 'project-detail';
-  selectedWorkspaceId: number;
+  selectedWorkspaceId: number | null;
   selectedProjectId: number | null;
   showModal: string | null;
   editingCatId: number | null;

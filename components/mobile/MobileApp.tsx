@@ -1,4 +1,7 @@
 'use client';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import { C, statusCfg, catCfg, type StatusKey, type CatKey } from '@/lib/constants';
 import { getCatSum, getPjSum, fmt } from '@/lib/utils';
 import type { SharedProps } from '@/components/PeaApp';
@@ -719,6 +722,7 @@ function MobileSheets(props: SharedProps) {
 
 function AddWsSheet({ S, update, closeModal }: SharedProps) {
   const f = S.form;
+  const createWs = useMutation(api.workspaces.create);
   return (
     <SheetBackdrop onClose={closeModal}>
       <div style={{ padding: '20px 20px 32px' }}>
@@ -730,10 +734,18 @@ function AddWsSheet({ S, update, closeModal }: SharedProps) {
           <SInp label="งบประมาณรวม (บาท)" type="number" value={f.wsBudget} onChange={e => update({ form: { ...f, wsBudget: e.target.value } })} placeholder="0" />
         </div>
         <SInp label="หน่วยงาน" value={f.wsDept} onChange={e => update({ form: { ...f, wsDept: e.target.value } })} placeholder="กฟภ. สาขาย่อย เขต 1" />
-        <SBtn label="สร้าง Workspace" onClick={() => {
+        <SBtn label="สร้าง Workspace" onClick={async () => {
           if (!f.wsName) return;
-          const nw = { id: Date.now(), name: f.wsName, year: parseInt(f.wsYear) || 2568, dept: f.wsDept || 'กฟภ.', totalBudget: parseFloat(f.wsBudget) || 0, projects: [] };
-          update({ workspaces: [...S.workspaces, nw], showModal: null, selectedWorkspaceId: nw.id, mobileScreen: 'dashboard' });
+          const localId = Date.now();
+          const nw = { id: localId, name: f.wsName, year: parseInt(f.wsYear) || 2568, dept: f.wsDept || 'กฟภ.', totalBudget: parseFloat(f.wsBudget) || 0, projects: [] };
+          update({ workspaces: [...S.workspaces, nw], showModal: null, selectedWorkspaceId: localId, mobileScreen: 'dashboard' });
+          const convexId = await createWs({
+            name:        f.wsName,
+            year:        parseInt(f.wsYear) || 2568,
+            dept:        f.wsDept || 'กฟภ.',
+            totalBudget: parseFloat(f.wsBudget) || 0,
+          });
+          update({ workspaces: S.workspaces.map(w => w.id === localId ? { ...w, _convexId: convexId } : w) });
         }} />
       </div>
     </SheetBackdrop>
@@ -742,6 +754,20 @@ function AddWsSheet({ S, update, closeModal }: SharedProps) {
 
 function AddPjSheet({ S, update, closeModal }: SharedProps) {
   const f = S.form;
+  const createPj = useMutation(api.projects.create);
+  const createWsForPj = useMutation(api.workspaces.create);
+  const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
+
+  const getOrCreateWsConvexId = async (): Promise<Id<'workspaces'> | null> => {
+    if (!ws) return null;
+    if (ws._convexId) return ws._convexId as Id<'workspaces'>;
+    const cid = await createWsForPj({
+      name: ws.name, year: ws.year, dept: ws.dept, totalBudget: ws.totalBudget,
+    });
+    update({ workspaces: S.workspaces.map(w2 => w2.id === ws.id ? { ...w2, _convexId: cid } : w2) });
+    return cid as Id<'workspaces'>;
+  };
+
   return (
     <SheetBackdrop onClose={closeModal}>
       <div style={{ padding: '20px 20px 32px' }}>
@@ -750,7 +776,7 @@ function AddPjSheet({ S, update, closeModal }: SharedProps) {
         <SInp label="ชื่องาน" value={f.pjName} onChange={e => update({ form: { ...f, pjName: e.target.value } })} placeholder="เช่น งาน กฟร.99 สาย 6" />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <SInp label="เลขที่อนุมัติ" value={f.pjApproval} onChange={e => update({ form: { ...f, pjApproval: e.target.value } })} placeholder="เช่น ศก(333) 66/69" />
-          <SInp label="วันที่เริ่มงาน" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="01 มิ.ย. 69" />
+          <SInp label="วันที่เริ่มงาน" type="date" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="" />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <SInp label="ผู้ควบคุมงาน" value={f.pjControl} onChange={e => update({ form: { ...f, pjControl: e.target.value } })} placeholder="ชื่อ-นามสกุล" />
@@ -761,10 +787,27 @@ function AddPjSheet({ S, update, closeModal }: SharedProps) {
           <SInp label="แผนก / แมก" value={f.pjDiv} onChange={e => update({ form: { ...f, pjDiv: e.target.value } })} placeholder="เช่น 103ช่" />
           <SInp label="งบประมาณรวม (บาท)" type="number" value={f.pjBudget} onChange={e => update({ form: { ...f, pjBudget: e.target.value } })} placeholder="0" />
         </div>
-        <SBtn label="สร้างแฟ้มงาน" onClick={() => {
+        <SBtn label="สร้างแฟ้มงาน" onClick={async () => {
           if (!f.pjName) return;
-          const np = { id: Date.now(), name: f.pjName, approvalNo: f.pjApproval || '', controlPerson: f.pjControl || '', phone: f.pjPhone || '', startDate: f.pjStart || '', budgetRef: f.pjRef || '', division: f.pjDiv || '', status: 'pending' as const, totalBudget: parseFloat(f.pjBudget) || 0, budgetCats: [] };
+          const localId = Date.now();
+          const np = { id: localId, name: f.pjName, approvalNo: f.pjApproval || '', controlPerson: f.pjControl || '', phone: f.pjPhone || '', startDate: f.pjStart || '', budgetRef: f.pjRef || '', division: f.pjDiv || '', status: 'pending' as const, totalBudget: parseFloat(f.pjBudget) || 0, budgetCats: [] };
           update({ workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId ? { ...w, projects: [...w.projects, np] } : w), showModal: null });
+          const wsConvexId = await getOrCreateWsConvexId();
+          if (wsConvexId) {
+            const convexId = await createPj({
+              workspaceId:   wsConvexId,
+              name:          f.pjName,
+              approvalNo:    f.pjApproval || '',
+              controlPerson: f.pjControl || '',
+              phone:         f.pjPhone || '',
+              startDate:     f.pjStart ? new Date(f.pjStart).getTime() : Date.now(),
+              budgetRef:     f.pjRef || '',
+              division:      f.pjDiv || '',
+              totalBudget:   parseFloat(f.pjBudget) || 0,
+              status:        'pending',
+            });
+            update({ workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId ? { ...w, projects: w.projects.map(p => p.id === localId ? { ...p, _convexId: convexId } : p) } : w) });
+          }
         }} />
       </div>
     </SheetBackdrop>
@@ -773,6 +816,9 @@ function AddPjSheet({ S, update, closeModal }: SharedProps) {
 
 function EditPjSheet({ S, update, closeModal }: SharedProps) {
   const f = S.form;
+  const updatePj = useMutation(api.projects.update);
+  const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
+  const pjLocal = ws?.projects.find(p => p.id === S.editingProjectId);
   const statuses = [
     { key: 'pending', label: 'รอดำเนิน' },
     { key: 'active', label: 'กำลังดำเนิน' },
@@ -787,7 +833,8 @@ function EditPjSheet({ S, update, closeModal }: SharedProps) {
         <SInp label="ชื่องาน" value={f.pjName} onChange={e => update({ form: { ...f, pjName: e.target.value } })} placeholder="ชื่องาน" />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <SInp label="เลขที่อนุมัติ" value={f.pjApproval} onChange={e => update({ form: { ...f, pjApproval: e.target.value } })} placeholder="เช่น ศก(333) 66/69" />
-          <SInp label="วันที่เริ่มงาน" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="01 มิ.ย. 69" />
+          {/* date picker */}
+          <SInp label="วันที่เริ่มงาน" type="date" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="" />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <SInp label="ผู้ควบคุมงาน" value={f.pjControl} onChange={e => update({ form: { ...f, pjControl: e.target.value } })} placeholder="ชื่อ-นามสกุล" />
@@ -814,16 +861,31 @@ function EditPjSheet({ S, update, closeModal }: SharedProps) {
             })}
           </div>
         </div>
-        <SBtn label="บันทึกการแก้ไข" onClick={() => {
+        <SBtn label="บันทึกการแก้ไข" onClick={async () => {
           if (!f.pjName || S.editingProjectId == null) return;
+          const newStatus = (f.pjStatus || 'pending') as 'pending' | 'active' | 'completed' | 'cancelled';
           update({
             workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId
               ? { ...w, projects: w.projects.map(p => p.id === S.editingProjectId
-                ? { ...p, name: f.pjName, approvalNo: f.pjApproval, controlPerson: f.pjControl, phone: f.pjPhone, startDate: f.pjStart, budgetRef: f.pjRef, division: f.pjDiv, totalBudget: parseFloat(f.pjBudget) || p.totalBudget, status: (f.pjStatus || p.status) as any }
+                ? { ...p, name: f.pjName, approvalNo: f.pjApproval, controlPerson: f.pjControl, phone: f.pjPhone, startDate: f.pjStart, budgetRef: f.pjRef, division: f.pjDiv, totalBudget: parseFloat(f.pjBudget) || p.totalBudget, status: newStatus }
                 : p) }
               : w),
             showModal: null, editingProjectId: null,
           });
+          if (pjLocal?._convexId) {
+            await updatePj({
+              id:            pjLocal._convexId as Id<'projects'>,
+              name:          f.pjName,
+              approvalNo:    f.pjApproval,
+              controlPerson: f.pjControl,
+              phone:         f.pjPhone,
+              startDate:     f.pjStart ? new Date(f.pjStart).getTime() : undefined,
+              budgetRef:     f.pjRef,
+              division:      f.pjDiv,
+              totalBudget:   parseFloat(f.pjBudget) || undefined,
+              status:        newStatus,
+            });
+          }
         }} />
       </div>
     </SheetBackdrop>
@@ -833,6 +895,7 @@ function EditPjSheet({ S, update, closeModal }: SharedProps) {
 function DeletePjSheet({ S, update, closeModal }: SharedProps) {
   const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
   const pj = ws?.projects.find(p => p.id === S.editingProjectId);
+  const removePj = useMutation(api.projects.remove);
   if (!pj) return null;
   return (
     <SheetBackdrop onClose={closeModal}>
@@ -849,7 +912,7 @@ function DeletePjSheet({ S, update, closeModal }: SharedProps) {
             style={{ flex: 1, padding: '14px', borderRadius: '14px', border: `1.5px solid ${C.line}`, background: C.white, color: C.sub, fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
             ยกเลิก
           </button>
-          <button onClick={() => {
+          <button onClick={async () => {
             update({
               workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId
                 ? { ...w, projects: w.projects.filter(p => p.id !== S.editingProjectId) }
@@ -857,6 +920,9 @@ function DeletePjSheet({ S, update, closeModal }: SharedProps) {
               showModal: null, editingProjectId: null,
               selectedProjectId: S.selectedProjectId === S.editingProjectId ? null : S.selectedProjectId,
             });
+            if (pj._convexId) {
+              await removePj({ id: pj._convexId as Id<'projects'> });
+            }
           }}
             style={{ flex: 1, padding: '14px', borderRadius: '14px', border: 'none', background: '#ef4444', color: 'white', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
             ลบโครงการ

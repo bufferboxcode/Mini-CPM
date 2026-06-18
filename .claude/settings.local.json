@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npm run *)",
       "Read(//usr/local/bin/**)",
-      "Read(//Users/test/.nvm/versions/**)"
+      "Read(//Users/test/.nvm/versions/**)",
+      "Bash(gh auth *)",
+      "Bash(vercel whoami *)",
+      "Bash(npx vercel *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)"
     ]
   }
 }

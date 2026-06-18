@@ -1,4 +1,7 @@
 'use client';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import { C, catCfg, statusCfg } from '@/lib/constants';
 import { getCatSum, fmt } from '@/lib/utils';
 import { Backdrop, ModalBox, MI, MRow, MSave } from '@/components/ui/Modal';
@@ -23,6 +26,7 @@ export default function Modals(props: SharedProps) {
 
 function AddWsModal({ S, update, closeModal }: SharedProps) {
   const f = S.form;
+  const createWs = useMutation(api.workspaces.create);
   return (
     <Backdrop onClose={closeModal}>
       <ModalBox title="สร้าง Workspace ใหม่" width="440px" onClose={closeModal}>
@@ -32,10 +36,21 @@ function AddWsModal({ S, update, closeModal }: SharedProps) {
           <MI label="งบประมาณรวม (บาท)" type="number" value={f.wsBudget} onChange={e => update({ form: { ...f, wsBudget: e.target.value } })} placeholder="0" />
         </MRow>
         <MI label="หน่วยงาน" value={f.wsDept} onChange={e => update({ form: { ...f, wsDept: e.target.value } })} placeholder="กฟภ. สาขาย่อย เขต 1" />
-        <MSave label="สร้าง Workspace" onClick={() => {
+        <MSave label="สร้าง Workspace" onClick={async () => {
           if (!f.wsName) return;
-          const nw = { id: Date.now(), name: f.wsName, year: parseInt(f.wsYear) || 2568, dept: f.wsDept || 'กฟภ.', totalBudget: parseFloat(f.wsBudget) || 0, projects: [] };
-          update({ workspaces: [...S.workspaces, nw], showModal: null, selectedWorkspaceId: nw.id, view: 'dashboard' });
+          const localId = Date.now();
+          // Optimistic local update
+          const nw = { id: localId, name: f.wsName, year: parseInt(f.wsYear) || 2568, dept: f.wsDept || 'กฟภ.', totalBudget: parseFloat(f.wsBudget) || 0, projects: [] };
+          update({ workspaces: [...S.workspaces, nw], showModal: null, selectedWorkspaceId: localId, view: 'dashboard' });
+          // Save to Convex — form fields → DB columns
+          const convexId = await createWs({
+            name:        f.wsName,                    // wsName → name
+            year:        parseInt(f.wsYear) || 2568,  // wsYear → year
+            dept:        f.wsDept || 'กฟภ.',          // wsDept → dept
+            totalBudget: parseFloat(f.wsBudget) || 0, // wsBudget → totalBudget
+          });
+          // อัปเดต _convexId ใน local state
+          update({ workspaces: S.workspaces.map(w => w.id === localId ? { ...w, _convexId: convexId } : w) });
         }} />
       </ModalBox>
     </Backdrop>
@@ -44,13 +59,28 @@ function AddWsModal({ S, update, closeModal }: SharedProps) {
 
 function AddPjModal({ S, update, closeModal }: SharedProps) {
   const f = S.form;
+  const createPj = useMutation(api.projects.create);
+  const createWsForPj = useMutation(api.workspaces.create);
+  const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
+
+  // ถ้า workspace ยังไม่มี _convexId (เช่น demo data) → สร้างใน Convex ก่อน
+  const getOrCreateWsConvexId = async (): Promise<Id<'workspaces'> | null> => {
+    if (!ws) return null;
+    if (ws._convexId) return ws._convexId as Id<'workspaces'>;
+    const cid = await createWsForPj({
+      name: ws.name, year: ws.year, dept: ws.dept, totalBudget: ws.totalBudget,
+    });
+    update({ workspaces: S.workspaces.map(w2 => w2.id === ws.id ? { ...w2, _convexId: cid } : w2) });
+    return cid as Id<'workspaces'>;
+  };
+
   return (
     <Backdrop onClose={closeModal}>
       <ModalBox title="สร้างแฟ้มงานใหม่" width="540px" onClose={closeModal}>
         <MI label="ชื่องาน" value={f.pjName} onChange={e => update({ form: { ...f, pjName: e.target.value } })} placeholder="เช่น งาน กฟร.99 สาย 6 หาง ศรีวิไล" />
         <MRow>
           <MI label="เลขที่อนุมัติ" value={f.pjApproval} onChange={e => update({ form: { ...f, pjApproval: e.target.value } })} placeholder="เช่น ศก(333) 66/69" />
-          <MI label="วันที่เริ่มงาน" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="เช่น 01 มิ.ย. 69" />
+          <MI label="วันที่เริ่มงาน" type="date" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="" />
         </MRow>
         <MRow>
           <MI label="ผู้ควบคุมงาน (พง.)" value={f.pjControl} onChange={e => update({ form: { ...f, pjControl: e.target.value } })} placeholder="ชื่อ-นามสกุล" />
@@ -61,10 +91,27 @@ function AddPjModal({ S, update, closeModal }: SharedProps) {
           <MI label="แผนก / แมก" value={f.pjDiv} onChange={e => update({ form: { ...f, pjDiv: e.target.value } })} placeholder="เช่น 103ช่" />
           <MI label="งบประมาณรวม (บาท)" type="number" value={f.pjBudget} onChange={e => update({ form: { ...f, pjBudget: e.target.value } })} placeholder="0" />
         </MRow>
-        <MSave label="สร้างแฟ้มงาน" onClick={() => {
+        <MSave label="สร้างแฟ้มงาน" onClick={async () => {
           if (!f.pjName) return;
-          const np = { id: Date.now(), name: f.pjName, approvalNo: f.pjApproval || '', controlPerson: f.pjControl || '', phone: f.pjPhone || '', startDate: f.pjStart || '', budgetRef: f.pjRef || '', division: f.pjDiv || '', status: 'pending' as const, totalBudget: parseFloat(f.pjBudget) || 0, budgetCats: [] };
+          const localId = Date.now();
+          const np = { id: localId, name: f.pjName, approvalNo: f.pjApproval || '', controlPerson: f.pjControl || '', phone: f.pjPhone || '', startDate: f.pjStart || '', budgetRef: f.pjRef || '', division: f.pjDiv || '', status: 'pending' as const, totalBudget: parseFloat(f.pjBudget) || 0, budgetCats: [] };
           update({ workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId ? { ...w, projects: [...w.projects, np] } : w), showModal: null });
+          const wsConvexId = await getOrCreateWsConvexId();
+          if (wsConvexId) {
+            const convexId = await createPj({
+              workspaceId:   wsConvexId,
+              name:          f.pjName,
+              approvalNo:    f.pjApproval || '',
+              controlPerson: f.pjControl || '',
+              phone:         f.pjPhone || '',
+              startDate:     f.pjStart ? new Date(f.pjStart).getTime() : Date.now(),
+              budgetRef:     f.pjRef || '',
+              division:      f.pjDiv || '',
+              totalBudget:   parseFloat(f.pjBudget) || 0,
+              status:        'pending',
+            });
+            update({ workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId ? { ...w, projects: w.projects.map(p => p.id === localId ? { ...p, _convexId: convexId } : p) } : w) });
+          }
         }} />
       </ModalBox>
     </Backdrop>
@@ -298,6 +345,9 @@ function ViewDivisionModal({ S, update, closeModal, pj }: SharedProps) {
 
 function EditPjModal({ S, update, closeModal }: SharedProps) {
   const f = S.form;
+  const updatePj = useMutation(api.projects.update);
+  const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
+  const pjLocal = ws?.projects.find(p => p.id === S.editingProjectId);
   const statuses = [
     { key: 'pending', label: 'รอดำเนิน' },
     { key: 'active', label: 'กำลังดำเนิน' },
@@ -310,7 +360,8 @@ function EditPjModal({ S, update, closeModal }: SharedProps) {
         <MI label="ชื่องาน" value={f.pjName} onChange={e => update({ form: { ...f, pjName: e.target.value } })} placeholder="เช่น งาน กฟร.99 สาย 6 หาง ศรีวิไล" />
         <MRow>
           <MI label="เลขที่อนุมัติ" value={f.pjApproval} onChange={e => update({ form: { ...f, pjApproval: e.target.value } })} placeholder="เช่น ศก(333) 66/69" />
-          <MI label="วันที่เริ่มงาน" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="เช่น 01 มิ.ย. 69" />
+          {/* date picker — ISO "YYYY-MM-DD" */}
+          <MI label="วันที่เริ่มงาน" type="date" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="" />
         </MRow>
         <MRow>
           <MI label="ผู้ควบคุมงาน (พง.)" value={f.pjControl} onChange={e => update({ form: { ...f, pjControl: e.target.value } })} placeholder="ชื่อ-นามสกุล" />
@@ -337,16 +388,33 @@ function EditPjModal({ S, update, closeModal }: SharedProps) {
             })}
           </div>
         </div>
-        <MSave label="บันทึกการแก้ไข" onClick={() => {
+        <MSave label="บันทึกการแก้ไข" onClick={async () => {
           if (!f.pjName || S.editingProjectId == null) return;
+          const newStatus = (f.pjStatus || 'pending') as 'pending' | 'active' | 'completed' | 'cancelled';
+          // Optimistic local update
           update({
             workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId
               ? { ...w, projects: w.projects.map(p => p.id === S.editingProjectId
-                ? { ...p, name: f.pjName, approvalNo: f.pjApproval, controlPerson: f.pjControl, phone: f.pjPhone, startDate: f.pjStart, budgetRef: f.pjRef, division: f.pjDiv, totalBudget: parseFloat(f.pjBudget) || p.totalBudget, status: (f.pjStatus || p.status) as any }
+                ? { ...p, name: f.pjName, approvalNo: f.pjApproval, controlPerson: f.pjControl, phone: f.pjPhone, startDate: f.pjStart, budgetRef: f.pjRef, division: f.pjDiv, totalBudget: parseFloat(f.pjBudget) || p.totalBudget, status: newStatus }
                 : p) }
               : w),
             showModal: null, editingProjectId: null,
           });
+          // Sync to Convex
+          if (pjLocal?._convexId) {
+            await updatePj({
+              id:            pjLocal._convexId as Id<'projects'>,
+              name:          f.pjName,
+              approvalNo:    f.pjApproval,
+              controlPerson: f.pjControl,
+              phone:         f.pjPhone,
+              startDate:     f.pjStart ? new Date(f.pjStart).getTime() : undefined,
+              budgetRef:     f.pjRef,
+              division:      f.pjDiv,
+              totalBudget:   parseFloat(f.pjBudget) || undefined,
+              status:        newStatus,
+            });
+          }
         }} />
       </ModalBox>
     </Backdrop>
@@ -356,6 +424,7 @@ function EditPjModal({ S, update, closeModal }: SharedProps) {
 function DeletePjModal({ S, update, closeModal }: SharedProps) {
   const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
   const pj = ws?.projects.find(p => p.id === S.editingProjectId);
+  const removePj = useMutation(api.projects.remove);
   if (!pj) return null;
   return (
     <Backdrop onClose={closeModal}>
@@ -371,7 +440,8 @@ function DeletePjModal({ S, update, closeModal }: SharedProps) {
             style={{ flex: 1, padding: '12px', borderRadius: '12px', border: `1.5px solid ${C.line}`, background: C.white, color: C.sub, fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
             ยกเลิก
           </button>
-          <button onClick={() => {
+          <button onClick={async () => {
+            // Optimistic local update
             update({
               workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId
                 ? { ...w, projects: w.projects.filter(p => p.id !== S.editingProjectId) }
@@ -379,6 +449,10 @@ function DeletePjModal({ S, update, closeModal }: SharedProps) {
               showModal: null, editingProjectId: null,
               selectedProjectId: S.selectedProjectId === S.editingProjectId ? null : S.selectedProjectId,
             });
+            // Sync to Convex
+            if (pj._convexId) {
+              await removePj({ id: pj._convexId as Id<'projects'> });
+            }
           }}
             style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: '#ef4444', color: 'white', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
             ลบโครงการ
