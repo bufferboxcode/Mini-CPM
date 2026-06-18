@@ -711,6 +711,8 @@ function MobileSheets(props: SharedProps) {
       {S.showModal === 'add-transaction' && <AddTxSheet {...props} />}
       {S.showModal === 'add-division' && <AddDivSheet {...props} />}
       {S.showModal === 'view-division' && <ViewDivSheet {...props} />}
+      {S.showModal === 'edit-project' && <EditPjSheet {...props} />}
+      {S.showModal === 'delete-project' && <DeletePjSheet {...props} />}
     </>
   );
 }
@@ -764,6 +766,102 @@ function AddPjSheet({ S, update, closeModal }: SharedProps) {
           const np = { id: Date.now(), name: f.pjName, approvalNo: f.pjApproval || '', controlPerson: f.pjControl || '', phone: f.pjPhone || '', startDate: f.pjStart || '', budgetRef: f.pjRef || '', division: f.pjDiv || '', status: 'pending' as const, totalBudget: parseFloat(f.pjBudget) || 0, budgetCats: [] };
           update({ workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId ? { ...w, projects: [...w.projects, np] } : w), showModal: null });
         }} />
+      </div>
+    </SheetBackdrop>
+  );
+}
+
+function EditPjSheet({ S, update, closeModal }: SharedProps) {
+  const f = S.form;
+  const statuses = [
+    { key: 'pending', label: 'รอดำเนิน' },
+    { key: 'active', label: 'กำลังดำเนิน' },
+    { key: 'completed', label: 'เสร็จแล้ว' },
+    { key: 'cancelled', label: 'ยกเลิก' },
+  ] as const;
+  return (
+    <SheetBackdrop onClose={closeModal}>
+      <div style={{ padding: '20px 20px 32px' }}>
+        <SheetHandle />
+        <div style={{ fontSize: '16px', fontWeight: '700', color: C.text, marginBottom: '20px' }}>แก้ไขโครงการ</div>
+        <SInp label="ชื่องาน" value={f.pjName} onChange={e => update({ form: { ...f, pjName: e.target.value } })} placeholder="ชื่องาน" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <SInp label="เลขที่อนุมัติ" value={f.pjApproval} onChange={e => update({ form: { ...f, pjApproval: e.target.value } })} placeholder="เช่น ศก(333) 66/69" />
+          <SInp label="วันที่เริ่มงาน" value={f.pjStart} onChange={e => update({ form: { ...f, pjStart: e.target.value } })} placeholder="01 มิ.ย. 69" />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <SInp label="ผู้ควบคุมงาน" value={f.pjControl} onChange={e => update({ form: { ...f, pjControl: e.target.value } })} placeholder="ชื่อ-นามสกุล" />
+          <SInp label="เบอร์โทรติดต่อ" type="tel" value={f.pjPhone} onChange={e => update({ form: { ...f, pjPhone: e.target.value } })} placeholder="08X-XXX-XXXX" />
+        </div>
+        <SInp label="หมายเลขงาน / หนังสืออ้างอิง" value={f.pjRef} onChange={e => update({ form: { ...f, pjRef: e.target.value } })} placeholder="C-69-B-TAK-CS-7009" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <SInp label="แผนก / แมก" value={f.pjDiv} onChange={e => update({ form: { ...f, pjDiv: e.target.value } })} placeholder="เช่น 103ช่" />
+          <SInp label="งบประมาณรวม (บาท)" type="number" value={f.pjBudget} onChange={e => update({ form: { ...f, pjBudget: e.target.value } })} placeholder="0" />
+        </div>
+        {/* Status selector */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ color: C.sub, fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>สถานะโครงการ</div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {statuses.map(st => {
+              const sc = statusCfg[st.key];
+              const isSel = (f.pjStatus || 'pending') === st.key;
+              return (
+                <button key={st.key} onClick={() => update({ form: { ...f, pjStatus: st.key } })}
+                  style={{ padding: '7px 16px', borderRadius: '20px', border: isSel ? `2px solid ${sc.color}` : `1px solid ${C.line}`, background: isSel ? sc.bg : 'none', color: isSel ? sc.color : C.sub, fontSize: '13px', fontWeight: isSel ? '700' : '400', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
+                  {st.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <SBtn label="บันทึกการแก้ไข" onClick={() => {
+          if (!f.pjName || S.editingProjectId == null) return;
+          update({
+            workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId
+              ? { ...w, projects: w.projects.map(p => p.id === S.editingProjectId
+                ? { ...p, name: f.pjName, approvalNo: f.pjApproval, controlPerson: f.pjControl, phone: f.pjPhone, startDate: f.pjStart, budgetRef: f.pjRef, division: f.pjDiv, totalBudget: parseFloat(f.pjBudget) || p.totalBudget, status: (f.pjStatus || p.status) as any }
+                : p) }
+              : w),
+            showModal: null, editingProjectId: null,
+          });
+        }} />
+      </div>
+    </SheetBackdrop>
+  );
+}
+
+function DeletePjSheet({ S, update, closeModal }: SharedProps) {
+  const ws = S.workspaces.find(w => w.id === S.selectedWorkspaceId);
+  const pj = ws?.projects.find(p => p.id === S.editingProjectId);
+  if (!pj) return null;
+  return (
+    <SheetBackdrop onClose={closeModal}>
+      <div style={{ padding: '20px 20px 32px' }}>
+        <SheetHandle />
+        <div style={{ textAlign: 'center', padding: '8px 0 24px' }}>
+          <div style={{ fontSize: '44px', marginBottom: '12px' }}>🗑️</div>
+          <div style={{ fontSize: '16px', fontWeight: '700', color: C.text, marginBottom: '6px' }}>ยืนยันการลบโครงการ</div>
+          <div style={{ fontSize: '13px', color: C.sub, marginBottom: '6px' }}>"{pj.name}"</div>
+          <div style={{ fontSize: '12px', color: '#ef4444' }}>ข้อมูลทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้</div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={closeModal}
+            style={{ flex: 1, padding: '14px', borderRadius: '14px', border: `1.5px solid ${C.line}`, background: C.white, color: C.sub, fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
+            ยกเลิก
+          </button>
+          <button onClick={() => {
+            update({
+              workspaces: S.workspaces.map(w => w.id === S.selectedWorkspaceId
+                ? { ...w, projects: w.projects.filter(p => p.id !== S.editingProjectId) }
+                : w),
+              showModal: null, editingProjectId: null,
+              selectedProjectId: S.selectedProjectId === S.editingProjectId ? null : S.selectedProjectId,
+            });
+          }}
+            style={{ flex: 1, padding: '14px', borderRadius: '14px', border: 'none', background: '#ef4444', color: 'white', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
+            ลบโครงการ
+          </button>
+        </div>
       </div>
     </SheetBackdrop>
   );
