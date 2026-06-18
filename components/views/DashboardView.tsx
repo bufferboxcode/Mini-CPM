@@ -129,10 +129,9 @@ export default function DashboardView({ S, update, ws }: SharedProps) {
             const pp = alloc > 0 ? Math.round(paid / alloc * 100) : 0;
             return (
               <div key={p.id}
+                className="hover-row"
                 onClick={() => update({ selectedProjectId: p.id, view: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
-                style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', padding: '13px 22px', borderBottom: idx < Math.min(pjs.length, 4) - 1 ? `1px solid ${C.line}` : 'none', cursor: 'pointer', alignItems: 'center' }}
-                onMouseEnter={e => (e.currentTarget.style.background = C.paper)}
-                onMouseLeave={e => (e.currentTarget.style.background = 'white')}
+                style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', padding: '13px 22px', borderBottom: idx < Math.min(pjs.length, 4) - 1 ? `1px solid ${C.line}` : 'none', alignItems: 'center' }}
               >
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: C.text, marginBottom: '2px' }}>{p.name}</div>

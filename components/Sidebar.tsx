@@ -57,6 +57,7 @@ export default function Sidebar({ S, update, ws }: SharedProps) {
         <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '9px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '7px' }}>WORKSPACE</div>
         <button
           onClick={() => update({ showWsDropdown: !S.showWsDropdown })}
+          className="ws-btn"
           style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '9px 12px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'SaoChingcha', sans-serif" }}
         >
           <div style={{ textAlign: 'left' }}>
@@ -72,6 +73,7 @@ export default function Sidebar({ S, update, ws }: SharedProps) {
           <div style={{ position: 'absolute', left: '14px', right: '14px', top: '80px', background: C.white, borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.2)', zIndex: 50, overflow: 'hidden' }}>
             {S.workspaces.map(w => (
               <button key={w.id} onClick={() => update({ selectedWorkspaceId: w.id, showWsDropdown: false, view: 'dashboard' })}
+                className="ws-item"
                 style={{ width: '100%', padding: '10px 14px', background: w.id === S.selectedWorkspaceId ? C.ghost : 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'SaoChingcha', sans-serif", borderBottom: `1px solid ${C.line}` }}>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ color: C.text, fontSize: '13px', fontWeight: '600' }}>{w.name}</div>
@@ -98,6 +100,7 @@ export default function Sidebar({ S, update, ws }: SharedProps) {
           const col = isA ? 'white' : 'rgba(255,255,255,0.42)';
           return (
             <button key={key} onClick={() => update({ view: key as AppState['view'], showWsDropdown: false })}
+              className="nav-item"
               style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', background: isA ? 'rgba(255,255,255,0.1)' : 'none', border: isA ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px', fontFamily: "'SaoChingcha', sans-serif" }}>
               <Icon color={col} />
               <span style={{ color: col, fontSize: '13px', fontWeight: isA ? '600' : '400' }}>{label}</span>

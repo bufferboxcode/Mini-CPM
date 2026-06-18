@@ -33,3 +33,102 @@ html, body {
 input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 input { -webkit-appearance: none; }
 button { font-family: 'SaoChingcha', sans-serif; cursor: pointer; }
+
+/* ── Global interactions ───────────────────────────────────────────────── */
+
+/* All buttons: smooth transition + press effect */
+button {
+  transition: filter 0.15s ease, transform 0.12s ease, background 0.15s ease,
+              box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+button:hover  { filter: brightness(1.08); }
+button:active { transform: scale(0.96); filter: brightness(0.94); }
+
+/* Gradient primary buttons — glow on hover */
+.btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(107,63,160,0.35) !important;
+}
+
+/* Ghost / outline buttons */
+.btn-ghost:hover {
+  background: #EDE8F8 !important;
+  filter: brightness(1);
+}
+
+/* Icon action buttons (edit/delete small squares) */
+.btn-icon:hover {
+  transform: scale(1.12);
+  filter: brightness(1);
+}
+.btn-icon:active { transform: scale(0.93); }
+
+/* Sidebar nav items */
+.nav-item:hover {
+  background: rgba(255,255,255,0.1) !important;
+  filter: brightness(1);
+}
+
+/* Workspace selector & dropdown items */
+.ws-btn:hover {
+  background: rgba(255,255,255,0.14) !important;
+  filter: brightness(1);
+}
+.ws-item:hover {
+  background: #F3EEFF !important;
+  filter: brightness(1);
+}
+
+/* Clickable cards — lift + shadow */
+.hover-card {
+  transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+  cursor: pointer;
+}
+.hover-card:hover {
+  box-shadow: 0 8px 28px rgba(107,63,160,0.16) !important;
+  transform: translateY(-2px);
+}
+.hover-card:active { transform: translateY(0) scale(0.99); }
+
+/* Table / list rows */
+.hover-row {
+  transition: background 0.12s ease !important;
+  cursor: pointer;
+}
+.hover-row:hover  { background: #F8F5FF !important; }
+.hover-row:active { background: #EDE8F8 !important; }
+
+/* Mobile project/workspace cards */
+.hover-card-mobile {
+  transition: box-shadow 0.18s ease, transform 0.18s ease !important;
+  cursor: pointer;
+}
+.hover-card-mobile:hover {
+  box-shadow: 0 6px 20px rgba(107,63,160,0.14) !important;
+  transform: translateY(-1px);
+}
+
+/* Input focus ring */
+input:focus {
+  border-color: #6B3FA0 !important;
+  box-shadow: 0 0 0 3px rgba(107,63,160,0.13) !important;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Filter / status chips */
+.chip:hover {
+  filter: brightness(0.94);
+  transform: scale(1.03);
+  transition: filter 0.13s ease, transform 0.13s ease;
+}
+
+/* Budget cat toggle (80/100%) */
+.pct-btn:hover { filter: brightness(1.1); }
+
+/* Collapsible section header */
+.collapse-header {
+  transition: filter 0.14s ease;
+  cursor: pointer;
+}
+.collapse-header:hover { filter: brightness(0.97); }

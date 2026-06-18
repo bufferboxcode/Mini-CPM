@@ -25,7 +25,7 @@ export function TopBar({ title, sub, actions }: { title: string; sub?: string; a
 
 export function PrimaryBtn({ label, onClick, noIcon }: { label: string; onClick: () => void; noIcon?: boolean }) {
   return (
-    <button onClick={onClick} style={{ background: `linear-gradient(135deg,${C.deep},${C.primary})`, border: 'none', color: 'white', padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif", display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <button onClick={onClick} className="btn-primary" style={{ background: `linear-gradient(135deg,${C.deep},${C.primary})`, border: 'none', color: 'white', padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif", display: 'flex', alignItems: 'center', gap: '6px' }}>
       {!noIcon && (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
           <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
@@ -38,7 +38,7 @@ export function PrimaryBtn({ label, onClick, noIcon }: { label: string; onClick:
 
 export function GhostBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} style={{ background: C.ghost, border: 'none', color: C.primary, padding: '9px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
+    <button onClick={onClick} className="btn-ghost" style={{ background: C.ghost, border: 'none', color: C.primary, padding: '9px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: "'SaoChingcha',sans-serif" }}>
       {label}
     </button>
   );

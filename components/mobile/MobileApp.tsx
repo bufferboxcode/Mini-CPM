@@ -47,7 +47,7 @@ function SInp({ label, type, value, onChange, placeholder }: {
 
 function SBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} style={{ width: '100%', padding: '14px', borderRadius: '14px', background: `linear-gradient(135deg,${C.deep},${C.primary})`, border: 'none', color: 'white', fontSize: '15px', fontWeight: '700', fontFamily: "'SaoChingcha',sans-serif", cursor: 'pointer', marginTop: '8px' }}>
+    <button onClick={onClick} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '14px', background: `linear-gradient(135deg,${C.deep},${C.primary})`, border: 'none', color: 'white', fontSize: '15px', fontWeight: '700', fontFamily: "'SaoChingcha',sans-serif", cursor: 'pointer', marginTop: '8px' }}>
       {label}
     </button>
   );
@@ -130,8 +130,9 @@ function WorkspaceListScreen({ S, update }: SharedProps) {
           const pct = tBudget > 0 ? Math.round(tSpent / tBudget * 100) : 0;
           return (
             <div key={w.id}
+              className="hover-card-mobile"
               onClick={() => update({ selectedWorkspaceId: w.id, mobileScreen: 'dashboard' })}
-              style={{ background: C.white, borderRadius: '16px', padding: '18px', marginBottom: '12px', border: `1px solid ${C.line}`, boxShadow: '0 2px 12px rgba(107,63,160,0.06)', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+              style={{ background: C.white, borderRadius: '16px', padding: '18px', marginBottom: '12px', border: `1px solid ${C.line}`, boxShadow: '0 2px 12px rgba(107,63,160,0.06)', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: `linear-gradient(180deg,${C.primary},${C.mid})`, borderRadius: '16px 0 0 16px' }} />
               <div style={{ paddingLeft: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
@@ -266,7 +267,8 @@ function MobileDashboardScreen({ S, update, ws }: SharedProps) {
             return (
               <div key={p.id}
                 onClick={() => update({ selectedProjectId: p.id, mobileScreen: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
-                style={{ padding: '12px 16px', borderBottom: idx < Math.min(pjs.length, 4) - 1 ? `1px solid ${C.line}` : 'none', cursor: 'pointer' }}>
+                className="hover-row"
+                style={{ padding: '12px 16px', borderBottom: idx < Math.min(pjs.length, 4) - 1 ? `1px solid ${C.line}` : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: C.text, flex: 1, marginRight: '8px', lineHeight: '1.3' }}>{p.name}</div>
                   <MBadge status={p.status} />
@@ -365,7 +367,7 @@ function MobileProjectListScreen({ S, update, ws }: SharedProps) {
           const pp = alloc > 0 ? Math.round(paid / alloc * 100) : 0;
           return (
             <div key={p.id}
-              style={{ background: C.white, borderRadius: '14px', marginBottom: '10px', border: `1px solid ${C.line}`, boxShadow: '0 1px 8px rgba(107,63,160,0.05)', overflow: 'hidden' }}>
+              style={{ background: C.white, borderRadius: '14px', marginBottom: '10px', border: `1px solid ${C.line}`, boxShadow: '0 1px 8px rgba(107,63,160,0.05)', overflow: 'hidden', transition: 'box-shadow 0.18s ease, transform 0.18s ease' }}>
               {/* Card body — tap to open detail */}
               <div onClick={() => update({ selectedProjectId: p.id, mobileScreen: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
                 style={{ padding: '14px', cursor: 'pointer' }}>

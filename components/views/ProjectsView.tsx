@@ -71,10 +71,9 @@ export default function ProjectsView({ S, update, ws }: SharedProps) {
             const pp = alloc > 0 ? Math.round(paid / alloc * 100) : 0;
             return (
               <div key={p.id}
+                className="hover-row"
                 onClick={() => update({ selectedProjectId: p.id, view: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
-                style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1.2fr 0.9fr 1fr 1fr 1fr 80px', padding: '14px 22px', borderBottom: idx < filtered.length - 1 ? `1px solid ${C.line}` : 'none', cursor: 'pointer', alignItems: 'center' }}
-                onMouseEnter={e => (e.currentTarget.style.background = C.paper)}
-                onMouseLeave={e => (e.currentTarget.style.background = 'white')}
+                style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1.2fr 0.9fr 1fr 1fr 1fr 80px', padding: '14px 22px', borderBottom: idx < filtered.length - 1 ? `1px solid ${C.line}` : 'none', alignItems: 'center' }}
               >
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: C.text, lineHeight: '1.35', marginBottom: '3px' }}>{p.name}</div>
@@ -95,6 +94,7 @@ export default function ProjectsView({ S, update, ws }: SharedProps) {
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
                   <button
                     title="แก้ไขโครงการ"
+                    className="btn-icon"
                     onClick={() => update({ showModal: 'edit-project', editingProjectId: p.id, form: { ...S.form, pjName: p.name, pjApproval: p.approvalNo, pjControl: p.controlPerson, pjPhone: p.phone, pjStart: p.startDate, pjRef: p.budgetRef, pjDiv: p.division, pjBudget: String(p.totalBudget), pjStatus: p.status } })}
                     style={{ width: '28px', height: '28px', borderRadius: '8px', border: `1px solid ${C.line}`, background: C.white, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.primary }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -104,6 +104,7 @@ export default function ProjectsView({ S, update, ws }: SharedProps) {
                   </button>
                   <button
                     title="ลบโครงการ"
+                    className="btn-icon"
                     onClick={() => update({ showModal: 'delete-project', editingProjectId: p.id })}
                     style={{ width: '28px', height: '28px', borderRadius: '8px', border: `1px solid #fecaca`, background: '#fff5f5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
