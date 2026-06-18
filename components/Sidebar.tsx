@@ -44,11 +44,7 @@ export default function Sidebar({ S, update, ws }: SharedProps) {
       {/* Logo */}
       <div style={{ padding: '24px 18px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `linear-gradient(135deg,${C.primary},${C.mid})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="white" />
-            </svg>
-          </div>
+          <img src="/logo.png" alt="MiniCPM Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }} />
           <div>
             <div style={{ color: 'white', fontSize: '16px', fontWeight: '700', lineHeight: '1.2' }}>MiniCPM</div>
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', letterSpacing: '0.5px' }}>การไฟฟ้าส่วนภูมิภาค</div>

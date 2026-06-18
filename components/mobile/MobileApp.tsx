@@ -59,29 +59,6 @@ function MBadge({ status }: { status: string }) {
   );
 }
 
-// ── Status Bar ─────────────────────────────────────────────────────────────
-
-function StatusBar() {
-  return (
-    <div style={{ height: '44px', background: C.sb, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px 0 24px', flexShrink: 0 }}>
-      <div style={{ color: 'white', fontSize: '13px', fontWeight: '700' }}>9:41</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
-          <rect x="0" y="7" width="2.5" height="3" rx="0.5" fill="white" opacity="0.4" />
-          <rect x="3.5" y="5" width="2.5" height="5" rx="0.5" fill="white" opacity="0.6" />
-          <rect x="7" y="2.5" width="2.5" height="7.5" rx="0.5" fill="white" opacity="0.8" />
-          <rect x="10.5" y="0" width="2.5" height="10" rx="0.5" fill="white" />
-        </svg>
-        <svg width="22" height="12" viewBox="0 0 22 12" fill="none">
-          <rect x="0.5" y="0.5" width="18" height="11" rx="2.5" stroke="white" strokeOpacity="0.6" />
-          <rect x="19" y="3.5" width="2.5" height="5" rx="1" fill="white" fillOpacity="0.6" />
-          <rect x="2" y="2" width="13" height="8" rx="1.5" fill="white" />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
 // ── Bottom Nav ─────────────────────────────────────────────────────────────
 
 function BottomNav({ screen, onNav }: { screen: string; onNav: (s: AppState['mobileScreen']) => void }) {
@@ -133,11 +110,7 @@ function WorkspaceListScreen({ S, update }: SharedProps) {
     <div style={{ flex: 1, overflowY: 'auto', background: C.paper }}>
       <div style={{ background: `linear-gradient(180deg,${C.sb},${C.sbMid})`, padding: '24px 20px 32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `linear-gradient(135deg,${C.primary},${C.mid})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="white" />
-            </svg>
-          </div>
+          <img src="/logo.png" alt="MiniCPM Logo" style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }} />
           <div>
             <div style={{ color: 'white', fontSize: '18px', fontWeight: '700' }}>MiniCPM</div>
             <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>การไฟฟ้าส่วนภูมิภาค</div>
@@ -966,7 +939,6 @@ export default function MobileApp(props: SharedProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: "'SaoChingcha', sans-serif", overflow: 'hidden', background: C.paper }}>
-      <StatusBar />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {screen === 'workspace-list' && <WorkspaceListScreen {...props} />}
         {screen === 'dashboard' && <MobileDashboardScreen {...props} />}
