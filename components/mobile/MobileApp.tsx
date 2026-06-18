@@ -362,31 +362,57 @@ function MobileProjectListScreen({ S, update, ws }: SharedProps) {
           const pp = alloc > 0 ? Math.round(paid / alloc * 100) : 0;
           return (
             <div key={p.id}
-              onClick={() => update({ selectedProjectId: p.id, mobileScreen: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
-              style={{ background: C.white, borderRadius: '14px', padding: '14px', marginBottom: '10px', border: `1px solid ${C.line}`, cursor: 'pointer', boxShadow: '0 1px 8px rgba(107,63,160,0.05)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                <div style={{ flex: 1, marginRight: '8px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: C.text, lineHeight: '1.3', marginBottom: '3px' }}>{p.name}</div>
-                  <div style={{ fontSize: '11px', color: C.sub }}>{p.approvalNo} • แมก {p.division}</div>
+              style={{ background: C.white, borderRadius: '14px', marginBottom: '10px', border: `1px solid ${C.line}`, boxShadow: '0 1px 8px rgba(107,63,160,0.05)', overflow: 'hidden' }}>
+              {/* Card body — tap to open detail */}
+              <div onClick={() => update({ selectedProjectId: p.id, mobileScreen: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
+                style={{ padding: '14px', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ flex: 1, marginRight: '8px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: C.text, lineHeight: '1.3', marginBottom: '3px' }}>{p.name}</div>
+                    <div style={{ fontSize: '11px', color: C.sub }}>{p.approvalNo} • แมก {p.division}</div>
+                  </div>
+                  <MBadge status={p.status} />
                 </div>
-                <MBadge status={p.status} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                  <div style={{ background: C.paper, borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ color: C.sub, fontSize: '10px' }}>เบิกจ่าย</div>
+                    <div style={{ color: C.text, fontSize: '13px', fontWeight: '700' }}>฿{fmt(paid)}</div>
+                  </div>
+                  <div style={{ background: rem >= 0 ? C.greenBg : C.redBg, borderRadius: '8px', padding: '8px 10px' }}>
+                    <div style={{ color: C.sub, fontSize: '10px' }}>คงเหลือ</div>
+                    <div style={{ color: rem >= 0 ? C.green : C.red, fontSize: '13px', fontWeight: '700' }}>฿{fmt(rem)}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ flex: 1, height: '5px', background: C.ghost, borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min(pp, 100)}%`, height: '100%', background: sc.color, borderRadius: '3px' }} />
+                  </div>
+                  <span style={{ color: sc.color, fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>{pp}%</span>
+                  <span style={{ color: C.sub, fontSize: '10px', flexShrink: 0 }}>{p.controlPerson}</span>
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                <div style={{ background: C.paper, borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ color: C.sub, fontSize: '10px' }}>เบิกจ่าย</div>
-                  <div style={{ color: C.text, fontSize: '13px', fontWeight: '700' }}>฿{fmt(paid)}</div>
-                </div>
-                <div style={{ background: rem >= 0 ? C.greenBg : C.redBg, borderRadius: '8px', padding: '8px 10px' }}>
-                  <div style={{ color: C.sub, fontSize: '10px' }}>คงเหลือ</div>
-                  <div style={{ color: rem >= 0 ? C.green : C.red, fontSize: '13px', fontWeight: '700' }}>฿{fmt(rem)}</div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ flex: 1, height: '5px', background: C.ghost, borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ width: `${Math.min(pp, 100)}%`, height: '100%', background: sc.color, borderRadius: '3px' }} />
-                </div>
-                <span style={{ color: sc.color, fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>{pp}%</span>
-                <span style={{ color: C.sub, fontSize: '10px', flexShrink: 0 }}>{p.controlPerson}</span>
+              {/* Action bar */}
+              <div style={{ display: 'flex', borderTop: `1px solid ${C.line}` }}>
+                <button
+                  onClick={() => update({ showModal: 'edit-project', editingProjectId: p.id, form: { ...S.form, pjName: p.name, pjApproval: p.approvalNo, pjControl: p.controlPerson, pjPhone: p.phone, pjStart: p.startDate, pjRef: p.budgetRef, pjDiv: p.division, pjBudget: String(p.totalBudget), pjStatus: p.status } })}
+                  style={{ flex: 1, padding: '10px', background: 'none', border: 'none', borderRight: `1px solid ${C.line}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: C.primary, fontSize: '13px', fontWeight: '600', fontFamily: "'SaoChingcha',sans-serif" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  แก้ไข
+                </button>
+                <button
+                  onClick={() => update({ showModal: 'delete-project', editingProjectId: p.id })}
+                  style={{ flex: 1, padding: '10px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#ef4444', fontSize: '13px', fontWeight: '600', fontFamily: "'SaoChingcha',sans-serif" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  ลบ
+                </button>
               </div>
             </div>
           );
