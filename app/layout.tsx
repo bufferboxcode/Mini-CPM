@@ -4,6 +4,17 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "MiniCPM",
   description: "ระบบบริหารจัดการโครงการก่อสร้างระบบไฟฟ้า",
+  openGraph: {
+    title: "MiniCPM",
+    description: "ระบบบริหารจัดการโครงการก่อสร้างระบบไฟฟ้า",
+    images: ["/logo.png"],
+  },
+  twitter: {
+    card: "summary",
+    title: "MiniCPM",
+    description: "ระบบบริหารจัดการโครงการก่อสร้างระบบไฟฟ้า",
+    images: ["/logo.png"],
+  },
 };
 
 export const viewport = {

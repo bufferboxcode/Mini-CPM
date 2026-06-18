@@ -54,8 +54,8 @@ export default function ProjectsView({ S, update, ws }: SharedProps) {
       {/* Table */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px' }}>
         <div style={{ background: C.white, borderRadius: '16px', border: `1px solid ${C.line}`, overflow: 'hidden', boxShadow: '0 2px 12px rgba(107,63,160,0.06)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1.2fr 0.9fr 1fr 1fr 1fr', padding: '10px 22px', background: C.ghost, borderBottom: `1px solid ${C.line}` }}>
-            {['ชื่องาน / เลขอนุมัติ', 'สถานะ', 'ผู้ควบคุมงาน', 'วันเริ่มงาน', 'เบิกจ่าย', 'คงเหลือ', 'ความคืบหน้า'].map((l, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1.2fr 0.9fr 1fr 1fr 1fr 80px', padding: '10px 22px', background: C.ghost, borderBottom: `1px solid ${C.line}` }}>
+            {['ชื่องาน / เลขอนุมัติ', 'สถานะ', 'ผู้ควบคุมงาน', 'วันเริ่มงาน', 'เบิกจ่าย', 'คงเหลือ', 'ความคืบหน้า', ''].map((l, i) => (
               <div key={i} style={{ color: C.sub, fontSize: '10px', fontWeight: '700', letterSpacing: '0.5px' }}>{l}</div>
             ))}
           </div>
@@ -72,7 +72,7 @@ export default function ProjectsView({ S, update, ws }: SharedProps) {
             return (
               <div key={p.id}
                 onClick={() => update({ selectedProjectId: p.id, view: 'project-detail', activeBudgetCat: 'all', activeBudgetStatus: 'all', selectedDivisionId: null })}
-                style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1.2fr 0.9fr 1fr 1fr 1fr', padding: '14px 22px', borderBottom: idx < filtered.length - 1 ? `1px solid ${C.line}` : 'none', cursor: 'pointer', alignItems: 'center' }}
+                style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1.2fr 0.9fr 1fr 1fr 1fr 80px', padding: '14px 22px', borderBottom: idx < filtered.length - 1 ? `1px solid ${C.line}` : 'none', cursor: 'pointer', alignItems: 'center' }}
                 onMouseEnter={e => (e.currentTarget.style.background = C.paper)}
                 onMouseLeave={e => (e.currentTarget.style.background = 'white')}
               >
@@ -90,6 +90,29 @@ export default function ProjectsView({ S, update, ws }: SharedProps) {
                     <div style={{ width: `${Math.min(pp, 100)}%`, height: '100%', background: sc.color, borderRadius: '3px' }} />
                   </div>
                   <span style={{ color: sc.color, fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>{pp}%</span>
+                </div>
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                  <button
+                    title="แก้ไขโครงการ"
+                    onClick={() => update({ showModal: 'edit-project', editingProjectId: p.id, form: { ...S.form, pjName: p.name, pjApproval: p.approvalNo, pjControl: p.controlPerson, pjPhone: p.phone, pjStart: p.startDate, pjRef: p.budgetRef, pjDiv: p.division, pjBudget: String(p.totalBudget), pjStatus: p.status } })}
+                    style={{ width: '28px', height: '28px', borderRadius: '8px', border: `1px solid ${C.line}`, background: C.white, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.primary }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <button
+                    title="ลบโครงการ"
+                    onClick={() => update({ showModal: 'delete-project', editingProjectId: p.id })}
+                    style={{ width: '28px', height: '28px', borderRadius: '8px', border: `1px solid #fecaca`, background: '#fff5f5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                      <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             );

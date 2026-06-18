@@ -51,7 +51,7 @@ export interface Workspace {
 export interface FormState {
   wsName: string; wsYear: string; wsDept: string; wsBudget: string;
   pjName: string; pjApproval: string; pjControl: string; pjPhone: string;
-  pjStart: string; pjRef: string; pjDiv: string; pjBudget: string;
+  pjStart: string; pjRef: string; pjDiv: string; pjBudget: string; pjStatus: string;
   bcName: string; bcCat: CatKey; bcAllocTotal: string; bcUsagePct: number; bcDivisionId: number | null;
   txDesc: string; txAmount: string; txDate: string;
   divCode: string; divNetworkCode: string; divDesc: string;
@@ -64,6 +64,7 @@ export interface AppState {
   selectedProjectId: number | null;
   showModal: string | null;
   editingCatId: number | null;
+  editingProjectId: number | null;
   editingTxId: number | null;
   targetCatId: number | null;
   editingDivId: number | null;

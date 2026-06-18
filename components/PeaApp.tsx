@@ -21,6 +21,7 @@ const INITIAL_STATE: AppState = {
   selectedProjectId: null,
   showModal: null,
   editingCatId: null,
+  editingProjectId: null,
   editingTxId: null,
   targetCatId: null,
   editingDivId: null,
@@ -62,7 +63,7 @@ export default function PeaApp() {
 
   const closeModal = () => update({
     showModal: null, editingCatId: null, editingTxId: null,
-    targetCatId: null, editingDivId: null, viewingDivId: null,
+    targetCatId: null, editingDivId: null, viewingDivId: null, editingProjectId: null,
   });
 
   const modPj = (fn: (p: Project) => Project) => update({
